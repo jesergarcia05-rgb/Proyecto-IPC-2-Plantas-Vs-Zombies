@@ -16,10 +16,24 @@ public class VentanaNuevaPartida extends JFrame {
     public VentanaNuevaPartida(GestorCuentas gestor, Cuenta cuenta) {
         super("Nueva partida - " + cuenta.getNickname()); this.gestor = gestor; this.cuenta = cuenta;
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        JPanel panel = new PanelFondo("Fondo4.jpg", new GridLayout(0, 1, 8, 12)); panel.setBorder(BorderFactory.createEmptyBorder(25, 35, 25, 35));
+        JPanel panel = new PanelFondo("Fondo4.jpg", new GridBagLayout());
         JButton elegir = new JButton("Elegir nivel JSON"), iniciar = new JButton("Iniciar"), cancelar = new JButton("Volver al menú");
-        panel.add(new JLabel("Nueva partida", SwingConstants.CENTER)); panel.add(seleccionado); panel.add(elegir);
-        panel.add(new JLabel("Dificultad")); panel.add(dificultad); panel.add(iniciar); panel.add(cancelar);
+        for (JButton boton : new JButton[]{elegir, iniciar, cancelar}) {
+            boton.setPreferredSize(new Dimension(170, 40));
+            boton.setFont(boton.getFont().deriveFont(Font.PLAIN, 12f));
+        }
+        dificultad.setPreferredSize(new Dimension(120, 28));
+        seleccionado.setHorizontalAlignment(SwingConstants.CENTER);
+        seleccionado.setPreferredSize(new Dimension(360, 24));
+        Component[] controles = {new JLabel("Nueva partida", SwingConstants.CENTER), seleccionado,
+            elegir, new JLabel("Dificultad"), dificultad, iniciar, cancelar};
+        GridBagConstraints posicion = new GridBagConstraints();
+        posicion.gridx = 0;
+        for (int i = 0; i < controles.length; i++) {
+            posicion.gridy = i;
+            posicion.insets = new Insets(0, 0, i == controles.length - 1 ? 0 : (i == 0 ? 25 : 12), 0);
+            panel.add(controles[i], posicion);
+        }
         elegir.addActionListener(e -> seleccionar()); iniciar.addActionListener(e -> iniciar());
         cancelar.addActionListener(e -> volver());
         addWindowListener(new java.awt.event.WindowAdapter() { public void windowClosing(java.awt.event.WindowEvent e) { volver(); } });
@@ -32,6 +46,7 @@ public class VentanaNuevaPartida extends JFrame {
         selector.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Nivel JSON", "json"));
         if (selector.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             archivo = selector.getSelectedFile(); seleccionado.setText(archivo.getName());
+            seleccionado.setToolTipText(archivo.getAbsolutePath());
         }
     }
     private void iniciar() {
