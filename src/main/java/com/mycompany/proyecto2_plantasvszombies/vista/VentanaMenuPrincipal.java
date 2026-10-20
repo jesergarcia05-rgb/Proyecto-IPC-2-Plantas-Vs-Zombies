@@ -12,16 +12,31 @@ public class VentanaMenuPrincipal extends JFrame {
     public VentanaMenuPrincipal(GestorCuentas gestor, Cuenta cuenta) {
         super("Zombis vs. Plantas - " + cuenta.getNickname()); this.gestor = gestor; this.cuenta = cuenta;
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        JPanel panel = new PanelFondo("Fondo2.jpg", new GridLayout(0, 1, 12, 12)); panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
-        panel.add(new JLabel("Cuenta: " + cuenta.getNickname(), SwingConstants.CENTER));
-        JButton nueva = new JButton("Nueva partida"), reanudar = new JButton("Reanudar partida guardada"), estadisticas = new JButton("Estadísticas y ranking"), salir = new JButton("Salir");
-        panel.add(nueva); panel.add(reanudar); panel.add(estadisticas); panel.add(salir);
-        for (JButton boton : new JButton[]{nueva, reanudar, estadisticas, salir}) {
+        JPanel panel = new PanelFondo("Fondo2.jpg", new GridBagLayout());
+        GridBagConstraints posicion = new GridBagConstraints();
+        posicion.gridx = 0;
+        posicion.gridy = 0;
+        posicion.insets = new Insets(0, 0, 35, 0);
+        JLabel titulo = new JLabel("Cuenta: " + cuenta.getNickname(), SwingConstants.CENTER);
+        titulo.setForeground(Color.WHITE);
+        panel.add(titulo, posicion);
+        JButton nueva = new JButton("Nueva partida"), reanudar = new JButton("Reanudar partida"), estadisticas = new JButton("Estadísticas"), salir = new JButton("Salir");
+        reanudar.setToolTipText("Reanudar partida guardada");
+        estadisticas.setToolTipText("Estadísticas de la cuenta y ranking global");
+        JButton[] botones = {nueva, reanudar, estadisticas, salir};
+        String[] iconos = {"Imagen de ChatGPT 3 oct 2026, 05_58_06 p.m.png",
+            "Imagen de ChatGPT 3 oct 2026, 05_58_06 p.m.png", "Fondo5.png", "Fondo 6.png"};
+        for (int i = 0; i < botones.length; i++) {
+            JButton boton = botones[i];
+            boton.setPreferredSize(new Dimension(170, 40));
+            boton.setFont(boton.getFont().deriveFont(Font.PLAIN, 12f));
+            boton.setIcon(Recursos.iconoEscalado(iconos[i], 24, 24));
             boton.setBackground(new Color(250, 245, 219)); boton.setForeground(new Color(35, 65, 30));
-            boton.setFont(boton.getFont().deriveFont(Font.BOLD, 15f));
+            posicion.gridy = i + 1;
+            posicion.insets = new Insets(0, 0, i == botones.length - 1 ? 0 : 20, 0);
+            panel.add(boton, posicion);
         }
-        ((JLabel)panel.getComponent(0)).setForeground(Color.WHITE);
-        panel.setPreferredSize(new Dimension(640, 430));
+        panel.setPreferredSize(new Dimension(690, 430));
         nueva.addActionListener(e -> { new VentanaNuevaPartida(gestor, cuenta).setVisible(true); dispose(); });
         reanudar.addActionListener(e -> reanudar()); estadisticas.addActionListener(e -> estadisticas()); salir.addActionListener(e -> dispose());
         add(panel); pack(); setMinimumSize(new Dimension(440, 320)); setLocationRelativeTo(null);
