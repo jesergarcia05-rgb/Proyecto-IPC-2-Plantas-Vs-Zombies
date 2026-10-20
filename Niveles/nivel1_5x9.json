@@ -1,0 +1,61 @@
+{
+  "duracionSegundos": 180,
+  "cerebrosIniciales": 150,
+  "jardin": [
+    [
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "LANZAGUISANTES",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "NUEZ",
+      "VACIO"
+    ],
+    [
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "HIELAGUISANTES",
+      "VACIO",
+      "VACIO",
+      "VACIO"
+    ],
+    [
+      "VACIO",
+      "PATATAPUM",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "PINCHOHIERBA",
+      "VACIO"
+    ],
+    [
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "VACIO"
+    ],
+    [
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "BIPETIDORA",
+      "VACIO",
+      "VACIO",
+      "VACIO",
+      "CARRONIVORA",
+      "VACIO"
+    ]
+  ]
+}
