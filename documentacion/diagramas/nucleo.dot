@@ -1,0 +1,26 @@
+digraph UML {
+ graph [rankdir=TB, bgcolor="white", pad="0.2", nodesep="0.3", ranksep="0.6"];
+ node [shape=record, fontname="DejaVu Sans", fontsize=11, style=filled, fillcolor="#EDF6F1", color="#39735A"];
+ edge [fontname="DejaVu Sans", fontsize=9, color="#60766B"];
+ Cuenta [label="{Cuenta|- nickname: String\l- estadisticas: Estadisticas\l|+ getNickname(): String\l+ getEstadisticas(): Estadisticas\l}"];
+ Estadisticas [label="{Estadisticas|- partidasJugadas / Ganadas / Perdidas: int\l- plantasDestruidas / zombisInvocados: int\l- cerebrosGastados / podadorasActivadas: int\l- mejorTiempoVictoria: int\l|+ registrarVictoria(tiempo)\l+ registrarDerrota()\l+ getPorcentajeVictorias(): double\l+ getPromedioPlantasDestruidas(): double\l}"];
+ Partida [label="{Partida|- cuenta: Cuenta\l- jardin: Jardin\l- zombis: Zombi[]\l- cerebros / tiempoRestante: int\l- pausada / terminada: boolean\l- podadorasDisponibles: boolean[]\l|+ pausar() / reanudar() / terminar()\l+ invocarZombi(z): boolean\l+ agregarZombiGenerado(z): boolean\l+ costoActual(base): int\l+ activarPodadora(fila): boolean\l}"];
+ Jardin [label="{Jardin|- casillas: Casilla[][]\l- filas / columnas: int\l|+ getCasilla(f,c): Casilla\l+ sembrar(tipo,f,c): boolean\l}"];
+ Casilla [label="{Casilla|- fila / columna: int\l- planta: Planta\l|+ colocarPlanta(p)\l+ quitarPlanta()\l}"];
+ Motor [label="{MotorCombate|- partida: Partida\l- proyectiles: Proyectil[]\l- cerebros: Cerebro[]\l- ahora: double\l- fechas y estados: arreglos\l|+ actualizar(segundos)\l+ actualizarGenerador(indice)\l+ recogerCerebro(indice): boolean\l+ casillaActual(z): int\l+ posicionVisual(z): double\l}"];
+ Proyectil [label="{Proyectil|- fila / direccion / danio: int\l- x / velocidad: double\l- hielo: boolean\l|+ avanzar(segundos)\l}"];
+ Cerebro [label="{Cerebro|- x / y / vence: double\l- generador: int\l|+ getX() / getY() / getVence()\l}"];
+ Config [label="{ConfiguracionNivel|- duracionSegundos: int\l- cerebrosIniciales: int\l- jardin: String[][]\l|+ getJardin(): String[][]\l}"];
+ ZombiRef [label="{«abstract» Zombi|Ver jerarquia de entidades}"];
+ PlantaRef [label="{«abstract» Planta|Ver jerarquia de entidades}"];
+ Partida -> ZombiRef [dir=both, arrowtail=odiamond, arrowhead=none, label="0..*"];
+ Casilla -> PlantaRef [dir=both, arrowtail=odiamond, arrowhead=none, label="0..1"];
+ Cuenta -> Estadisticas [dir=both, arrowtail=diamond, arrowhead=none, label="1"];
+ Partida -> Cuenta [label="1"];
+ Partida -> Jardin [dir=both, arrowtail=diamond, arrowhead=none, label="1"];
+ Jardin -> Casilla [dir=both, arrowtail=diamond, arrowhead=none, label="filas × columnas"];
+ Motor -> Partida [label="1"];
+ Motor -> Proyectil [dir=both, arrowtail=diamond, arrowhead=none, label="0..*"];
+ Motor -> Cerebro [dir=both, arrowtail=diamond, arrowhead=none, label="0..*"];
+ Config -> Jardin [style=dashed, label="configura"];
+}

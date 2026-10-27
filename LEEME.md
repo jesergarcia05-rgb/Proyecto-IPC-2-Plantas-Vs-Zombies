@@ -1,76 +1,65 @@
-# Zombis vs. Plantas — versión corregida
+# Zombis vs. Plantas — proyecto corregido
 
-Esta copia parte de las clases Java que enviaste. Los originales y el repositorio anterior no se modificaron.
+Incluye las fuentes, el JAR ejecutable, niveles de ejemplo, tus 34 imágenes originales, ocho variantes de estado, pruebas y los dos manuales PDF.
 
-## Ejecutar
+## Abrir el juego
 
-Necesitas Java 21 o superior y una sesión gráfica de escritorio.
+Instala **Java 21 o superior**, extrae toda la carpeta y ejecuta:
 
-Desde la carpeta del proyecto:
+- **Windows:** `ejecutar.bat`.
+- **Linux/macOS:** `sh ejecutar.sh`.
+- Desde una terminal en esta carpeta: `java -jar dist/ZombisVsPlantas.jar`.
 
-```text
-java -jar dist/ZombisVsPlantas.jar
-```
+Las cuentas se guardan en `cuentas`, relativa al directorio desde el que abras el programa. Conserva esa carpeta al actualizar. No se incluyen datos personales ni las cuentas creadas para las pruebas.
 
-Crea o selecciona una cuenta. En «Nueva partida» elige un archivo de `Niveles` y una dificultad. Selecciona un zombi del catálogo y pulsa un carril. Pulsa los cerebros rosados para recogerlos. Cada cerebro entrega 25 unidades y desaparece a los 5 segundos de juego.
+## Manuales
 
-El botón «Pausar / Reanudar» detiene el juego y abre las opciones de reanudar o guardar y salir. Para recuperar una partida utiliza «Reanudar partida guardada» desde el menú: el tablero se reconstruye pausado.
+- [Manual de usuario PDF](documentacion/Manual_de_usuario.pdf): instalación y capturas de cuentas, menú, configuración, combate, pausa, guardado, reanudación y estadísticas.
+- [Manual técnico PDF](documentacion/Manual_tecnico.pdf): UML, arquitectura, herencia, interfaces, algoritmos, ciclo de vida de hilos, coordenadas, IA y formatos de archivos.
+- [Guía técnica breve](GUIA_TECNICA.md) y [validación](VALIDACION.md).
 
-Las cuentas se guardan en `cuentas`, relativa al directorio desde el que ejecutes Java. Ejecuta siempre desde la misma carpeta para ver las mismas cuentas. Los nombres de las carpetas nuevas se codifican en hexadecimal para distinguir nicknames como `Ana` y `ana`, incluso en Windows. Las carpetas de cuentas antiguas también se leen.
+Las capturas de los manuales salen de la aplicación. Los historiales utilizados en el ranking son datos de demostración aislados; la escena comparativa de zombis es una escena de prueba del renderizador.
 
-## Compilar sin bibliotecas externas
+## Compilar
 
-Instala el **JDK 21** o superior y asegúrate de que `java`, `javac` y `jar` estén en PATH.
+Necesitas el **JDK 21** o superior, con `javac`, `java` y `jar` en PATH.
 
-- Windows: ejecuta `compilar.bat` desde esta carpeta.
-- Linux/macOS: ejecuta `sh compilar.sh`.
+- Windows: `compilar.bat`.
+- Linux/macOS: `sh compilar.sh`.
 
-El resultado es `dist/ZombisVsPlantas.jar`. No requiere Maven, Gradle ni AbsoluteLayout. Las fuentes están organizadas por paquetes en `src/main/java`, y los recursos en `src/main/resources`.
+El resultado es `dist/ZombisVsPlantas.jar`, con recursos incluidos y Main-Class configurada. La aplicación solo requiere el JDK estándar: sin Maven/Gradle, AbsoluteLayout ni otras bibliotecas externas. Los PDF ya generados tampoco requieren instalar herramientas adicionales para usar el juego.
 
-Las pantallas de nueva partida, menú y juego se construyen con Swing estándar. No reemplaces esas clases por los `.form` viejos: volverían a introducir diseños y eventos anteriores. Para abrirlo en NetBeans puedes crear un proyecto Java con fuentes existentes y seleccionar `src/main/java` como raíz, con la clase principal `com.mycompany.proyecto2_plantasvszombies.principal.Proyecto2_PlantasVsZombies`.
+Las fuentes están organizadas por paquetes en `src/main/java`. Para abrirlas en un IDE, selecciona esa raíz de fuentes y la clase principal `com.mycompany.proyecto2_plantasvszombies.principal.Proyecto2_PlantasVsZombies`. Los formularios antiguos no deben reemplazar las pantallas corregidas: reintroducirían eventos y dependencias anteriores.
 
-## Cambios
+## Correcciones incluidas
 
-- Lector JSON que respeta filas, espacios y validaciones; rechaza carriles irregulares, identificadores desconocidos, jardines vacíos y parámetros inválidos.
-- Compilación solo con JDK; imágenes cargadas desde recursos del JAR, sin rutas de Windows.
-- Caracono pierde el escudo antes de recibir daño en salud y pasa a daño 15 sin cono.
-- Cerebros con procesos lógicos independientes (6/5/4 según dificultad), espera aleatoria 5–15 segundos, duración 5 segundos y botín de 3–6 al eliminar una planta.
-- Cerebros dibujados y detectados sobre las demás entidades; recoger no invoca zombis ni bloquea la simulación.
-- Defensa automática por dificultad, con una acción por evaluación y prioridades en orden.
-- Hordas en los bloques 4 y 7, con precios y aviso visibles. Las fronteras usan fracciones de segundo.
-- Guardado binario de modelo, motor, proyectiles, efectos, cerebros, generadores, IA, podadoras y fracción del reloj; carga en pausa.
-- Estadísticas al finalizar una partida, tres rankings Top 5 y resumen de cuenta.
-- Contadores separados para zombis comprados y zombis generados gratuitamente.
-- Estados visuales de plantas y zombis, podadoras y aplastamiento. Se usan los sprites originales cuando estan disponibles; los dibujos vectoriales quedan como respaldo para archivos faltantes.
+- Lector propio de JSON con validación de filas, columnas, identificadores y parámetros.
+- Cerebros recolectables, botín de plantas, hordas, podadoras y resumen final.
+- Tres dificultades con defensa automática en orden de prioridad.
+- Un hilo de reloj y **6/5/4 hilos generadores independientes**. Todos entregan sus acciones al EDT de Swing; al pausar se interrumpen y al reanudar se recrean conservando las fechas pendientes.
+- Guardado binario completo y carga en pausa, sin serializar hilos ni ventanas.
+- Estadísticas y tres rankings Top 5; zombis comprados y generados se cuentan por separado.
+- Común sin brazo, Deportista sin casco, Garrocha sin arma y con/sin brazo, Zombistein sin Zombidito después de lanzarlo, Bailarín y Zombidito con sprite propio. El lanzamiento tiene trayectoria aérea.
+- Imágenes originales conservadas y empaquetadas. Los botones del menú/nueva partida miden 170 × 40 y el selector 120 × 28; no se estiran al ampliar la ventana.
 
-## Decisiones que el enunciado deja abiertas
+## Decisiones del juego
 
-- Los costos fraccionarios se redondean hacia arriba: en horda final un común cuesta 13 y Zombistein 88. El catálogo y el cobro usan la misma regla.
-- El enunciado menciona soles de la IA, pero no define saldo inicial, generación ni costos de plantas. No se inventó una economía de soles; la defensa elige según prioridad y casillas disponibles.
-- Los generadores son procesos lógicos con estado independiente, ejecutados por el mismo reloj del juego. No son 4/5/6 hilos de sistema operativo. Esto mantiene todo el estado mutable en el hilo de Swing, sin sincronización prohibida.
-- Cuando faltan sprites específicos, las plantas tienen marcadores y los zombis dibujos vectoriales. Se incluyeron las 34 imágenes de tu ZIP, incluidos jardines, plantas y los seis zombis del catálogo.
-- El guardado utiliza serialización Java con versión y filtro de clases. Es compatible con esta versión corregida, no con formatos de otras implementaciones.
+Los costos fraccionarios se redondean hacia arriba: un común cuesta 13 en la horda final y Zombistein 88. El catálogo y el cobro usan la misma regla.
+
+El enunciado menciona soles de la IA pero no fija saldo, generación ni costos. La defensa decide por prioridad y casillas disponibles, sin inventar una economía de soles.
+
+Las carpetas de cuentas nuevas codifican el nickname en hexadecimal para distinguir mayúsculas incluso en Windows. Se conserva la lectura de carpetas anteriores.
+
+Las variantes gráficas se agregan como archivos nuevos; tus 34 originales mantienen su contenido. Los estados no dependen de editar datos de vida al dibujar.
 
 ## Pruebas
 
-`sh probar.sh` compila el JAR y ejecuta las pruebas de lógica en un directorio temporal. Para probar la interfaz en una sesión gráfica:
+`sh probar.sh` compila y ejecuta 52 comprobaciones de lógica, 32 de concurrencia y 22 visuales/lanzamiento, en un directorio temporal. Para agregar pruebas de interfaz y una victoria real por clics, en una sesión gráfica:
 
 ```sh
 PROBAR_INTERFAZ=1 sh probar.sh
 ```
 
-Las pruebas comprueban JSON, escudos, descuentos, pausa, podadoras, victoria, todas las prioridades de la IA, botín, economía, explosiones, salto bloqueado, cuentas y continuidad después de guardar. La prueba gráfica comprueba el hilo, la pausa visible, el pintado, el guardado y el regreso al menú.
+Se incluye `herramientas/CapturarManuales.java` para reproducir las capturas usando una carpeta de trabajo temporal. No lo ejecutes sobre tus cuentas personales: crea historiales de demostración.
 
-Consulta `GUIA_TECNICA.md` para entender las clases y algoritmos. Esta guía no sustituye los manuales PDF con UML y capturas solicitados para la entrega académica.
-
-## Restauración de imágenes
-
-Se restauraron los fondos disponibles de menú y nueva partida. El tablero y el catálogo usan los sprites originales cuando están presentes. Además del contenido del JAR, se buscan imágenes en la carpeta `Imagenes` junto al directorio de ejecución y en `src/main/resources/Imagenes`.
-
-Nombres esperados: `zombi.png`, `caracono.png`, `garrocha.png`, `deportista.png`, `bailon.png`, `zombistein.png`, `bailarin.png`, `zombidito.png`, `lanzaguisantes.png`, `hielaguisantes.png`, `patatapum.png`, `nuez.png`, `carronivora.png`, `pinchohierba.png`, `bipetidora.png`. El tablero también admite JPG y GIF con el mismo nombre base.
-
-Para variantes de estado se admiten `zombi_sin_brazo.png`, `caracono_sin_cono.png`, `deportista_sin_casco.png` y `garrocha_sin_garrocha.png`. Si no existe una variante se indica el estado con texto o se conserva el respaldo. Los cambios en las imágenes no cambian las reglas de combate.
-
-Las 34 imágenes de Imagenes.zip están incluidas sin modificar sus archivos. Se usan los jardines y las plantas originales (priorizando las versiones _sin_fondo), y los seis sprites del catálogo tanto en los botones como en el tablero. El ZIP no contiene sprites separados de Bailarín, Zombidito o variantes de daño; esas variantes conservan los respaldos documentados.
-
-Vista comprobada: `capturas/partida-con-tus-imagenes.png` (partida pausada; los botones se muestran deshabilitados por la pausa).
+`herramientas/generar_manuales.py` usa Python, ReportLab y Pillow para regenerar los PDF. Los diagramas DOT se renderizan con Graphviz. Estas son herramientas de documentación, no dependencias Java del juego.

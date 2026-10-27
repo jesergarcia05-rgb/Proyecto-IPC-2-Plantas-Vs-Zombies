@@ -1,0 +1,8 @@
+digraph UML {
+ graph [rankdir=LR, bgcolor="white", pad="0.2", ranksep="0.5"];
+ node [shape=record, fontname="DejaVu Sans", fontsize=12, style=filled, fillcolor="#EDF6F1", color="#39735A"];
+ edge [arrowhead=empty, color="#60766B"];
+ Planta [label="{{«abstract» Planta|- salud / fila / columna: int\l|+ recibirDanio(cantidad)\l+ estaViva(): boolean\l}}"];
+ L [label="{{Lanzaguisantes|20 daño, 100 HP\l}}"];P [label="{{Patatapum|- activa: boolean\l|+ activar()\l}}"];H [label="{{Hielaguisantes|15 daño, hielo 4 s\l}}"];N [label="{{Nuez|+ obtenerEstadoVisual(): int\l}}"];C [label="{{Carronivora|- digiriendo: boolean\l|+ iniciarDigestion()\l+ terminarDigestion()\l}}"];I [label="{{Pinchohierba|+ recibirDanio(cantidad)\l}}"];B [label="{{Bipetidora|+ getDisparosTraseros(): int\l}}"];
+ L->Planta;P->Planta;H->Planta;N->Planta;C->Planta;I->Planta;B->Planta;
+}

@@ -34,6 +34,8 @@ classDiagram
     MotorCombate --> Partida
     MotorCombate o-- Proyectil
     MotorCombate o-- Cerebro
+    VentanaPartida --> HilosPartida
+    HilosPartida --> MotorCombate
     VentanaPartida --> MotorCombate
     VentanaPartida --> PanelJardinFondo
     GestorPartidas --> MotorCombate
@@ -43,13 +45,15 @@ classDiagram
 
 ## Tiempo e hilos
 
-`VentanaPartida` inicia un `Thread` que espera 40 ms y publica una tarea mediante `SwingUtilities.invokeLater`. El hilo trabajador no lee ni escribe entidades, dinero ni temporizadores. Todos esos cambios y los clics se ejecutan secuencialmente en el EDT. Al cerrar, guardar o terminar se interrumpe el trabajador. El hilo es daemon.
+`HilosPartida` crea un hilo de reloj y un Thread por generador: 6 en Fácil, 5 en Medio y 4 en Difícil. Cada trabajador espera 40 ms y publica una tarea con `SwingUtilities.invokeLater`. El reloj solicita el fotograma; el generador i solicita `actualizarGenerador(i)`.
 
-Cada fotograma mide segundos mediante `System.nanoTime`. Se limita el paso a 0.15 s para que una demora grande no teletransporte entidades. El mismo paso se aplica al contador y al motor, por lo que la simulación y el reloj no divergen. Si la máquina se bloquea, el juego simulado se ralentiza en vez de saltarse el combate.
+Todos los accesos al modelo y a la interfaz ocurren en el EDT. Los trabajadores no leen ni escriben dinero, salud, posiciones, pausas o temporizadores. En el EDT se valida la sesión de cada tarea, de modo que las entregas antiguas se descartan después de pausar o cerrar.
 
-El motor mantiene un tiempo de simulación `ahora`. Los próximos disparos, mordiscos, bailes, preparación, digestión, congelación, siembra e iconos son fechas relativas a ese reloj. La pausa evita avanzar tanto el contador como el motor, y bloquea los clics sobre el jardín. No se usan `Timer`, `volatile`, `synchronized`, `wait/notify` ni `java.util.concurrent`.
+Pausar interrumpe los trabajadores. Reanudar conserva el estado y las fechas, reinicia el instante del fotograma y crea una sesión nueva. Guardar, finalizar o cerrar también los detiene. No se usan Timer, volatile, synchronized, wait/notify ni java.util.concurrent.
 
-Cada generador de cerebros tiene una posición en el arreglo `proximoCerebro`. Sus estados son: esperar hasta una fecha; crear un icono; esperar a su recolección o vencimiento; programar una nueva espera aleatoria. Mientras hay un icono activo la fecha se marca como infinito. El número de procesos independientes es 6 en Fácil, 5 en Medio y 4 en Difícil.
+Cada generador conserva su fecha `proximoCerebro[i]` en tiempo de juego. Espera 5–15 s, crea un icono y espera a que se recoja o venza antes de programar otra espera. El indicador de generadores externos es transient: no se serializan trabajadores y no hay doble emisión. El modo interno permite pruebas sin ventanas.
+
+La ventana usa System.nanoTime y limita cada paso a 0.15 s, aplicándolo al contador y al motor por igual. Si la máquina se bloquea, se ralentiza la simulación en lugar de saltarse el combate.
 
 ## Coordenadas y combate
 
@@ -85,6 +89,10 @@ El binario contiene un `GestorPartidas.Estado` con versión, motor y fracción d
 
 ## Alcance visual
 
-El JAR incluye las 34 imágenes de Imagenes.zip, con sus fondos y sprites originales. Las plantas y los seis zombis del catálogo utilizan esas imágenes; los dibujos vectoriales solo se usan cuando falta un sprite. Los brazos y escudos cambian con el estado; la Nuez muestra grietas; Patatapum muestra preparación/activación; Carroñívora indica digestión. Se representan salto, baile, lanzamiento y aplastamiento. Puedes reemplazar los marcadores por tus recursos originales sin cambiar las reglas del modelo.
+El JAR incluye las 34 imágenes de Imagenes.zip, con sus fondos y sprites originales. Las plantas y los seis zombis del catálogo utilizan esas imágenes; los dibujos vectoriales solo se usan cuando falta un sprite. Los brazos y escudos cambian con el estado; la Nuez muestra grietas; Patatapum muestra preparación/activación; Carroñívora indica digestión. Se representan salto, baile, lanzamiento aéreo de Zombidito y aplastamiento. Puedes reemplazar los marcadores por tus recursos originales sin cambiar las reglas del modelo.
 
-Actualización visual: se priorizan los sprites disponibles, con variantes opcionales para escudos y brazo; el respaldo vectorial solo se usa cuando falta un archivo. Menú y selección recuperan Fondo2.jpg y Fondo4.jpg, respectivamente.
+Actualización visual: se priorizan los sprites disponibles, con las ocho variantes adicionales incluidas para escudos, arma, brazo, lanzamiento y zombis generados; el respaldo vectorial solo se usa cuando falta un archivo. Menú y selección recuperan Fondo2.jpg y Fondo4.jpg, respectivamente.
+
+## Manuales completos
+
+Ver `documentacion/Manual_tecnico.pdf` y `documentacion/Manual_de_usuario.pdf`. Incluyen UML, ciclo de vida de trabajadores, formatos y capturas reales de todos los flujos.

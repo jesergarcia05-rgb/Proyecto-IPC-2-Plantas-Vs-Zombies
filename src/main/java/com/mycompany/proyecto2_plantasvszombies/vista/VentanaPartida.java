@@ -7,7 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 
-/** Un hilo publica fotogramas; todo el estado mutable se modifica en el EDT. */
+/** Un reloj y 6/5/4 hilos generadores; el estado mutable se modifica en el EDT. */
 public class VentanaPartida extends JFrame {
     private final GestorCuentas gestor;
     private final Cuenta cuenta;
@@ -20,7 +20,7 @@ public class VentanaPartida extends JFrame {
     private final String[] nombres = {"Común", "Caracono", "Garrocha", "Deportista", "Bailón", "Zombistein"};
     private final int[] costos = {50, 100, 100, 150, 150, 350};
     private int seleccionado = -1, ultimoBloque;
-    private Thread hilo;
+    private final HilosPartida hilos;
     private long instante;
     private double fraccion;
     private File archivoOrigen;
@@ -33,6 +33,7 @@ public class VentanaPartida extends JFrame {
     public VentanaPartida(GestorCuentas gestor, Cuenta cuenta, MotorCombate motor, double fraccion, File origen) {
         super("Zombis vs. Plantas - " + cuenta.getNickname());
         this.gestor = gestor; this.cuenta = cuenta; this.motor = motor; this.partida = motor.getPartida();
+        this.hilos = new HilosPartida(motor, () -> fotograma());
         this.fraccion = fraccion; this.archivoOrigen = origen; this.ultimoBloque = partida.getBloque();
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         tablero.setJardin(partida.getJardin()); tablero.setPartida(partida); tablero.setMotorCombate(motor);
@@ -60,29 +61,19 @@ public class VentanaPartida extends JFrame {
         opciones.add(new JLabel("El reloj, combate, cerebros y defensa están detenidos."));
         JButton reanudar = new JButton("Reanudar"), guardar = new JButton("Guardar y salir");
         opciones.add(reanudar); opciones.add(guardar); dialogoPausa.add(opciones); dialogoPausa.pack();
-        reanudar.addActionListener(e -> { partida.reanudar(); instante = System.nanoTime(); dialogoPausa.setVisible(false); actualizarPanel(); });
+        reanudar.addActionListener(e -> { partida.reanudar(); iniciarHilo(); dialogoPausa.setVisible(false); actualizarPanel(); });
         guardar.addActionListener(e -> guardarYSalir());
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent e) {
-                iniciarHilo(); if (partida.estaPausada()) abrirPausa();
+                if (partida.estaPausada()) abrirPausa(); else iniciarHilo();
             }
             public void windowClosing(java.awt.event.WindowEvent e) { abrirPausa(); }
             public void windowClosed(java.awt.event.WindowEvent e) { detenerHilo(); dialogoPausa.dispose(); }
         });
         actualizarPanel(); pack(); setLocationRelativeTo(null);
     }
-    private void iniciarHilo() {
-        if (hilo != null) return;
-        instante = System.nanoTime();
-        hilo = new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                try { Thread.sleep(40); }
-                catch (InterruptedException ex) { Thread.currentThread().interrupt(); return; }
-                SwingUtilities.invokeLater(() -> fotograma());
-            }
-        }, "Reloj-del-juego"); hilo.setDaemon(true); hilo.start();
-    }
-    private void detenerHilo() { if (hilo != null) { hilo.interrupt(); hilo = null; } }
+    private void iniciarHilo() { instante = System.nanoTime(); hilos.iniciar(); }
+    private void detenerHilo() { hilos.detener(); }
     private void fotograma() {
         if (!isDisplayable() || partida.estaTerminada()) return;
         long ahora = System.nanoTime(); double dt = Math.max(0, (ahora - instante) / 1_000_000_000.0); instante = ahora;
@@ -124,15 +115,15 @@ public class VentanaPartida extends JFrame {
         Zombi z = crear(seleccionado, fila);
         if (!partida.invocarZombi(z)) {
             // El dialogo modal no debe dejar avanzar el juego por debajo.
-            partida.pausar(); actualizarPanel();
+            partida.pausar(); detenerHilo(); actualizarPanel();
             JOptionPane.showMessageDialog(this, "Cerebros insuficientes: necesitas " + partida.costoActual(z.getCosto()) + ".");
-            partida.reanudar(); instante = System.nanoTime();
+            partida.reanudar(); iniciarHilo();
         } else seleccionado = -1;
         actualizarPanel(); tablero.repaint();
     }
     private void abrirPausa() {
         if (partida.estaTerminada()) return;
-        partida.pausar(); actualizarPanel(); dialogoPausa.setLocationRelativeTo(this); dialogoPausa.setVisible(true);
+        partida.pausar(); detenerHilo(); actualizarPanel(); dialogoPausa.setLocationRelativeTo(this); dialogoPausa.setVisible(true);
     }
     private void guardarYSalir() {
         try {

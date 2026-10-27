@@ -1,15 +1,20 @@
-# Validación realizada
+# Validación de la entrega actual
 
-- Compilación completa con JDK 21, sin classpath de terceros: correcta.
-- Creación del JAR con Main-Class y recursos incluidos: correcta.
-- 52 comprobaciones de lógica y persistencia: correctas.
-- Pruebas Swing sobre pantalla virtual: correctas. Se comprobó carga pausada, reanudación, avance del hilo, compra por clic y cobro, recolección por clic sin invocar accidentalmente, pausa, pintado, guardado binario y regreso al menú.
-- El recorrido de Swing se ejecutó cargando las clases de la aplicación desde el JAR generado.
-- Revisión de fuentes: sin AbsoluteLayout, Collections dinámicas, Timer de Swing, volatile, synchronized, java.util.concurrent ni rutas absolutas de Windows.
-- Repositorio original: sin cambios.
+- Compilación con JDK 21 estándar, sin classpath de terceros: correcta.
+- JAR ejecutable con Main-Class y recursos empaquetados: correcto.
+- **52 comprobaciones de lógica y persistencia:** correctas.
+- **32 comprobaciones de concurrencia:** correctas. Verifican 6/5/4 hilos reales, emisión por trabajador, detención en pausa, carga sin duplicados y ausencia de trabajadores huérfanos.
+- **22 comprobaciones visuales y de lanzamiento:** correctas. Verifican selección de variantes de estado, vuelo, pausa y aterrizaje.
+- **Prueba de interfaz:** compra y recolección por clic, pausa, pintado, guardado y regreso al menú, correctos.
+- **Partida completa por clics y reloj real:** primera llegada consume podadora; segunda produce victoria; resumen y estadísticas persistidos, correctos.
+- **Flujo completo de documentación:** crear/seleccionar cuenta, explorador JSON, configuración, partida, generación de cerebros por hilos, guardar, cargar exactamente en pausa, derrota en un nivel corto, estadísticas y rankings, correctos.
+- **Compatibilidad:** un binario creado con el JAR anterior se cargó y actualizó con esta versión.
+- Las 34 imágenes originales se conservaron byte a byte. Se agregaron ocho variantes transparentes de estado, sin sustituir esos originales.
+- Botones de menú/nueva partida de 170 × 40 y selector de 120 × 28, conservados.
+- Manual técnico y manual de usuario PDF generados, con diagramas UML y capturas incluidas.
 
-Las pruebas se ejecutaron en Linux con Java 21 y Xvfb. No se ejecutaron en una máquina Windows; se incluyen scripts de compilación y ejecución para ese sistema. Se incorporaron las 34 imágenes originales de Imagenes.zip. Se verificó que cada archivo empaquetado en el JAR es idéntico al original y se inspeccionó una captura de partida mostrando sprites, jardín y catálogo. Solo los recursos o variantes que no existen en el ZIP usan respaldos. Los manuales PDF académicos no forman parte de esta corrección de código; LEEME.md y GUIA_TECNICA.md documentan la implementación entregada.
+La aplicación no utiliza bibliotecas Java externas, Collections dinámicas, Lombok, Timer de Swing, volatile, synchronized, wait/notify ni java.util.concurrent. Todos los campos de las clases de aplicación son privados o protegidos. El código de herramientas y pruebas está separado de src/main/java.
 
-Ajuste del menú: botones de 170 × 40, como en el diseño original. Se comprobó su tamaño y que no se estiran al ampliar la ventana. El JAR se recompiló y la captura está en capturas/menu-botones-pequenos.png.
+Las pruebas se ejecutaron en Linux con JDK 21 y pantalla virtual Xvfb. Los scripts de Windows están incluidos, pero no se probaron en una máquina Windows. Las comprobaciones cubren los casos descritos y no sustituyen la revisión académica de todos los posibles niveles.
 
-Ajuste de Nueva partida: tres botones de 170 × 40 y selector de dificultad de 120 × 28, centrados y sin estirarse al ampliar la ventana. Compilación y comprobación visual correctas; captura en capturas/nueva-partida-botones-pequenos.png.
+Las capturas usan cuentas/datos de demostración en un directorio temporal; esos historiales no se entregan como cuentas reales. La escena de estados visuales es una escena de prueba identificada como tal en los manuales.

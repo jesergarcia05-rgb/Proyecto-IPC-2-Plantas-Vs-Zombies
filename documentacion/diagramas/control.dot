@@ -1,0 +1,24 @@
+digraph UML {
+ graph [rankdir=TB, bgcolor="white", pad="0.2", nodesep="0.4", ranksep="0.6"];
+ node [shape=record, fontname="DejaVu Sans", fontsize=12, style=filled, fillcolor="#EDF6F1", color="#39735A"];
+ edge [fontname="DejaVu Sans", fontsize=10, color="#60766B"];
+ V [label="{VentanaPartida|- motor: MotorCombate\l- hilos: HilosPartida\l|- fotograma()\l- guardarYSalir()\l}"];
+ H [label="{HilosPartida|- generadores: Thread[]\l- sesion: int\l|+ iniciar()\l+ detener()\l}"];
+ Panel [label="{PanelJardinFondo|- sprites y estado\l|# paintComponent(g)\l}"];
+ Callback [label="{«interface»\nSeleccionCarril|+ alSeleccionarCarril(fila)\l}"];
+ Swing [label="{«JDK» SwingUtilities|+ invokeLater(tarea)\l}"];
+ GP [label="{GestorPartidas|+ guardar(...)\l+ cargar(...)\l+ listar(cuenta)\l}"];
+ Estado [label="{«serializable» Estado|- version: int\l- motor: MotorCombate\l- fraccionSegundo: double\l}"];
+ GC [label="{GestorCuentas|- cuentas: Cuenta[]\l|+ crearCuenta(nickname)\l+ guardarEstadisticas(c)\l}"];
+ L [label="{LectorNivel|+ leerNivel(archivo)\l}"];
+ A [label="{«private» Analizador|- texto / posicion\l|leer()\l}"];
+ V -> H [label="controla"];
+ V -> Panel [label="dibuja"];
+ Panel -> Callback [label="notifica clic"];
+ H -> Swing [label="publica tareas"];
+ V -> GP [label="persiste / carga"];
+ V -> GC [label="estadísticas"];
+ GP -> Estado [label="serializa"];
+ Estado -> L [style=invis];
+ L -> A [dir=both, arrowtail=diamond, arrowhead=none];
+}

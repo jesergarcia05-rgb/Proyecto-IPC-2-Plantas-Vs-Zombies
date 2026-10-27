@@ -147,7 +147,7 @@ private void cargarFondo() {
         jLabel1.setBounds(360, 330, 90, 20);
 
         jLabel2.setForeground(new java.awt.Color(0, 51, 51));
-        jLabel2.setText("Ingresa El Nombre De La Partida ");
+        jLabel2.setText("Nickname (1 a 12 caracteres)");
         getContentPane().add(jLabel2);
         jLabel2.setBounds(300, 360, 200, 30);
 
@@ -170,6 +170,7 @@ private void cargarFondo() {
         jButton1.setBounds(300, 430, 72, 23);
 
         jButton2.setText("Cancelar");
+        jButton2.setMargin(new java.awt.Insets(2, 4, 2, 4));
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);

@@ -54,6 +54,7 @@ public class PanelJardinFondo extends JPanel {
     private final BufferedImage[] imagenesZombis;
     private final BufferedImage imagenBailarin, imagenZombidito;
     private final BufferedImage comunSinBrazo, conoSinCono, cascoSinCasco, garrochaSinGarrocha;
+    private final BufferedImage giganteSinZombidito, garrochaSinBrazo, garrochaConGarrochaSinBrazo;
 
     // Recibe el carril seleccionado; la ventana se encarga de comprar.
     public interface SeleccionCarril {
@@ -94,6 +95,9 @@ public class PanelJardinFondo extends JPanel {
 
         imagenBailarin = cargarImagenOpcional("bailarin.png");
         imagenZombidito = cargarImagenOpcional("zombidito.png");
+        giganteSinZombidito = cargarImagenOpcional("zombistein_sin_zombidito.png");
+        garrochaSinBrazo = cargarImagenOpcional("garrocha_sin_brazo.png");
+        garrochaConGarrochaSinBrazo = cargarImagenOpcional("garrocha_con_garrocha_sin_brazo.png");
         comunSinBrazo = cargarImagenOpcional("zombi_sin_brazo.png");
         conoSinCono = cargarImagenOpcional("caracono_sin_cono.png");
         cascoSinCasco = cargarImagenOpcional("deportista_sin_casco.png");
@@ -436,8 +440,9 @@ public class PanelJardinFondo extends JPanel {
             int ancho = Math.max(12, (int)Math.min(a.anchoCasilla * 0.5, a.altoCasilla * 0.5));
             if (z instanceof Zombidito) ancho = Math.max(10, ancho * 2 / 3);
             if (z instanceof Zombistein) ancho = ancho * 5 / 4;
-            int x = (int)(a.x + (z.getPosicionX() + 0.35) * a.anchoCasilla);
+            int x = (int)(a.x + ((motorCombate == null ? z.getPosicionX() : motorCombate.posicionVisual(z)) + 0.35) * a.anchoCasilla);
             int y = (int)(a.y + (z.getFila() + 0.5) * a.altoCasilla);
+            if (motorCombate != null) y -= (int)(motorCombate.alturaVuelo(z) * a.altoCasilla);
             boolean salto = motorCombate != null && motorCombate.estaSaltando(z);
             if (salto) y -= Math.max(12, (int)(Math.abs(Math.sin(motorCombate.getTiempoTranscurrido() * 9)) * 25));
             if (z instanceof ZombiBailon && ((ZombiBailon)z).estaBailando())
@@ -450,6 +455,9 @@ public class PanelJardinFondo extends JPanel {
                 // Se conserva la orientacion del proyecto original: avance hacia la derecha.
                 g2.drawImage(sprite, x + w / 2, y - h / 2, x - w / 2, y + h / 2,
                     0, 0, sprite.getWidth(), sprite.getHeight(), this);
+                if (z instanceof Zombistein && motorCombate != null && motorCombate.estaLanzando(z)) {
+                    g2.setColor(Color.YELLOW); g2.drawString("¡Lanzamiento!", x - w / 2, y - h / 2 - 5);
+                }
                 String estado = "";
                 if (z.perdioBrazo()) estado += "Sin brazo ";
                 if (z instanceof ZombiCaracono && !((ZombiCaracono)z).tieneCono()) estado += "Sin cono ";
@@ -524,11 +532,21 @@ public class PanelJardinFondo extends JPanel {
     private BufferedImage spriteZombi(Zombi z) {
         if (z instanceof ZombiBailarin && imagenBailarin != null) return imagenBailarin;
         if (z instanceof Zombidito && imagenZombidito != null) return imagenZombidito;
+        if (z instanceof Zombistein && ((Zombistein)z).haLanzadoZombidito() && giganteSinZombidito != null) return giganteSinZombidito;
         if (z instanceof ZombiComun && z.perdioBrazo() && comunSinBrazo != null) return comunSinBrazo;
-        if (z instanceof ZombiCaracono && !((ZombiCaracono)z).tieneCono())
+        if (z instanceof ZombiCaracono && !((ZombiCaracono)z).tieneCono()) {
+            if (z.perdioBrazo() && comunSinBrazo != null) return comunSinBrazo;
             return conoSinCono != null ? conoSinCono : imagenesZombis[0];
+        }
         if (z instanceof ZombiDeportista && !((ZombiDeportista)z).tieneCasco() && cascoSinCasco != null) return cascoSinCasco;
-        if (z instanceof ZombiGarrocha && !((ZombiGarrocha)z).tieneGarrocha() && garrochaSinGarrocha != null) return garrochaSinGarrocha;
+        if (z instanceof ZombiGarrocha) {
+            boolean salto = ((ZombiGarrocha)z).haSaltado();
+            if (z.perdioBrazo()) {
+                if (salto && garrochaSinBrazo != null) return garrochaSinBrazo;
+                if (!salto && garrochaConGarrochaSinBrazo != null) return garrochaConGarrochaSinBrazo;
+            }
+            if (salto && garrochaSinGarrocha != null) return garrochaSinGarrocha;
+        }
         int i = indiceZombi(z); return i < 0 ? null : imagenesZombis[i];
     }
 

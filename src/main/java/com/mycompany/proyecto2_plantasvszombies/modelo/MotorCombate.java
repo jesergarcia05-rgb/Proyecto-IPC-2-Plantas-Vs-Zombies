@@ -5,9 +5,9 @@ import com.mycompany.proyecto2_plantasvszombies.zombis.*;
 
 /**
  * Logica de movimiento, colisiones y combate. No crea hilos ni toca Swing.
- * La ventana llama actualizar(segundos) desde el EDT cada ~40 ms; el unico
- * Thread del proyecto solo duerme y publica esos cambios con invokeLater.
- * Utiliza solo arreglos nativos y el JDK estandar; no introduce nuevos hilos.
+ * La ventana publica fotogramas en el EDT. Cada generador tiene su propio
+ * trabajador en HilosPartida, que publica actualizarGenerador(indice).
+ * El modelo solo se modifica en el EDT y no contiene referencias a hilos.
  */
 public class MotorCombate implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
@@ -27,11 +27,14 @@ public class MotorCombate implements java.io.Serializable {
     private Cerebro[] cerebros = new Cerebro[24];
     private int cantidadCerebros;
     private double[] proximoCerebro;
+    private transient boolean generadoresExternos;
     private double proximaDefensa;
     private double[][] preparadaEn;
     private double[][] aplastadaHasta;
     private double[] saltoHasta = new double[10];
     private double[] lanzamientoHasta = new double[10];
+    private double[] vueloHasta = new double[10];
+    private double[] origenVuelo = new double[10];
     private int plantasDestruidas;
     private boolean victoria;
     // La animacion es visual; el exterminio del carril es instantaneo.
@@ -79,7 +82,7 @@ public class MotorCombate implements java.io.Serializable {
     }
     public boolean estaCongelado(Zombi z) {
         int i = indiceZombi(z);
-        return i >= 0 && ahora < congeladoHasta[i];
+        return i >= 0 && i < congeladoHasta.length && ahora < congeladoHasta[i];
     }
 
     private int indiceZombi(Zombi z) {
@@ -111,6 +114,9 @@ public class MotorCombate implements java.io.Serializable {
 
     private void asegurarEspacioZombis() {
         int n = partida.getCantidadZombis();
+        // Compatibilidad con guardados anteriores a la animacion de lanzamiento.
+        if (vueloHasta == null) vueloHasta = new double[proximoMordisco.length];
+        if (origenVuelo == null) origenVuelo = new double[proximoMordisco.length];
         if (n <= proximoMordisco.length) return;
         int nuevo = Math.max(n, proximoMordisco.length * 2);
         double[] mordisco = new double[nuevo];
@@ -129,6 +135,10 @@ public class MotorCombate implements java.io.Serializable {
         System.arraycopy(saltoHasta, 0, salto, 0, saltoHasta.length);
         System.arraycopy(lanzamientoHasta, 0, lanzamiento, 0, lanzamientoHasta.length);
         saltoHasta = salto; lanzamientoHasta = lanzamiento;
+        double[] vuelo = new double[nuevo], origen = new double[nuevo];
+        System.arraycopy(vueloHasta, 0, vuelo, 0, vueloHasta.length);
+        System.arraycopy(origenVuelo, 0, origen, 0, origenVuelo.length);
+        vueloHasta = vuelo; origenVuelo = origen;
     }
 
     private void activarPatatapumsYDigestion() {
@@ -193,7 +203,7 @@ public class MotorCombate implements java.io.Serializable {
     private boolean hayZombiEnDireccion(int fila, double x, int direccion) {
         for (int i = 0; i < partida.getCantidadZombis(); i++) {
             Zombi z = partida.getZombi(i);
-            if (!z.estaVivo() || z.getFila() != fila) continue;
+            if (!z.estaVivo() || z.getFila() != fila || estaEnVuelo(z)) continue;
             double zx = z.getPosicionX() + 0.35;
             if (direccion < 0 && zx < x) return true;
             if (direccion > 0 && zx >= x) return true;
@@ -227,7 +237,7 @@ public class MotorCombate implements java.io.Serializable {
             double mejorDistancia = Double.POSITIVE_INFINITY;
             for (int j = 0; j < partida.getCantidadZombis(); j++) {
                 Zombi z = partida.getZombi(j);
-                if (!z.estaVivo() || z.getFila() != p.getFila()) continue;
+                if (!z.estaVivo() || z.getFila() != p.getFila() || estaEnVuelo(z)) continue;
                 double centro = z.getPosicionX() + 0.35;
                 if (centro >= desde && centro <= hasta) {
                     double d = Math.abs(centro - anterior);
@@ -252,7 +262,7 @@ public class MotorCombate implements java.io.Serializable {
             if (victoria) return;
             asegurarEspacioZombis(); // Bailon y Zombistein pueden crear zombis durante este mismo ciclo.
             Zombi z = partida.getZombi(i);
-            if (!z.estaVivo()) continue;
+            if (!z.estaVivo() || estaEnVuelo(z)) continue;
             int f = z.getFila();
             // Al perder la mitad de vida, Zombistein lanza al Zombidito una vez.
             if (z instanceof Zombistein) {
@@ -260,6 +270,9 @@ public class MotorCombate implements java.io.Serializable {
                 if (grande.debeLanzarZombidito()) {
                     double xLanzamiento = Math.max(0, jardin.getColumnas() - 2.35);
                     partida.agregarZombiGenerado(new Zombidito(f, xLanzamiento));
+                    asegurarEspacioZombis();
+                    int hijo = partida.getCantidadZombis() - 1;
+                    origenVuelo[hijo] = z.getPosicionX(); vueloHasta[hijo] = ahora + 0.8;
                     grande.marcarZombiditoComoLanzado();
                     lanzamientoHasta[i] = ahora + 0.8;
                 }
@@ -413,7 +426,7 @@ public class MotorCombate implements java.io.Serializable {
                 if (p instanceof Pinchohierba && ahora >= proximoPincho[f][c]) {
                     for (int i = 0; i < partida.getCantidadZombis(); i++) {
                         Zombi z = partida.getZombi(i);
-                        if (z.estaVivo() && z.getFila() == f && casillaActual(z) == c) {
+                        if (z.estaVivo() && !estaEnVuelo(z) && z.getFila() == f && casillaActual(z) == c) {
                             if (z instanceof Zombistein) {
                                 aplastadaHasta[f][c] = ahora + 0.8;
                                 destruirPlanta(f, c);
@@ -427,7 +440,7 @@ public class MotorCombate implements java.io.Serializable {
                     boolean explotar = false;
                     for (int i = 0; i < partida.getCantidadZombis(); i++) {
                         Zombi z = partida.getZombi(i);
-                        if (z.estaVivo() && z.getFila() == f && casillaActual(z) == c) {
+                        if (z.estaVivo() && !estaEnVuelo(z) && z.getFila() == f && casillaActual(z) == c) {
                             z.recibirDanio(((Patatapum) p).getDanio());
                             explotar = true;
                         }
@@ -436,7 +449,7 @@ public class MotorCombate implements java.io.Serializable {
                 } else if (p instanceof Carronivora && !((Carronivora) p).estaDigiriendo()) {
                     for (int i = 0; i < partida.getCantidadZombis(); i++) {
                         Zombi z = partida.getZombi(i);
-                        if (!z.estaVivo() || z.getFila() != f) continue;
+                        if (!z.estaVivo() || z.getFila() != f || estaEnVuelo(z)) continue;
                         int casilla = casillaActual(z);
                         if (casilla != c && casilla != c - 1) continue;
                         if (z instanceof Zombistein) {
@@ -469,6 +482,20 @@ public class MotorCombate implements java.io.Serializable {
     public boolean estaSaltando(Zombi z) { int i = indiceZombi(z); return i >= 0 && i < saltoHasta.length && ahora < saltoHasta[i]; }
     public boolean estaLanzando(Zombi z) { int i = indiceZombi(z); return i >= 0 && i < lanzamientoHasta.length && ahora < lanzamientoHasta[i]; }
     public boolean recienAplastada(int f, int c) { return ahora < aplastadaHasta[f][c]; }
+    public boolean estaEnVuelo(Zombi z) {
+        int i = indiceZombi(z);
+        return i >= 0 && vueloHasta != null && i < vueloHasta.length && ahora < vueloHasta[i];
+    }
+    public double posicionVisual(Zombi z) {
+        if (!estaEnVuelo(z)) return z.getPosicionX();
+        int i = indiceZombi(z); double progreso = 1 - (vueloHasta[i] - ahora) / .8;
+        return origenVuelo[i] + (z.getPosicionX() - origenVuelo[i]) * progreso;
+    }
+    public double alturaVuelo(Zombi z) {
+        if (!estaEnVuelo(z)) return 0;
+        int i = indiceZombi(z); double progreso = 1 - (vueloHasta[i] - ahora) / .8;
+        return Math.sin(Math.PI * progreso) * .9;
+    }
     private double esperaCerebro() { return 5 + azar.nextInt(11); }
     private void agregarCerebro(Cerebro cerebro) {
         if (cantidadCerebros == cerebros.length) {
@@ -491,13 +518,19 @@ public class MotorCombate implements java.io.Serializable {
     private void actualizarEconomia() {
         for (int i = cantidadCerebros - 1; i >= 0; i--)
             if (ahora >= cerebros[i].getVence()) quitarCerebro(i);
-        for (int i = 0; i < proximoCerebro.length; i++) {
-            if (ahora >= proximoCerebro[i]) {
-                agregarCerebro(new Cerebro(0.2 + azar.nextDouble() * Math.max(0.1, jardin.getColumnas() - 0.4),
-                    0.2 + azar.nextDouble() * Math.max(0.1, jardin.getFilas() - 0.4), ahora + 5, i));
-                // Cada proceso espera a que su icono se recoja o expire antes de reiniciar.
-                proximoCerebro[i] = Double.POSITIVE_INFINITY;
-            }
+        // En la aplicacion cada Thread publica su propia evaluacion. El modo
+        // interno permite simulaciones sin interfaz y pruebas deterministas.
+        if (!generadoresExternos)
+            for (int i = 0; i < proximoCerebro.length; i++) actualizarGenerador(i);
+    }
+    public void usarGeneradoresExternos(boolean externos) { generadoresExternos = externos; }
+    public void actualizarGenerador(int indice) {
+        if (partida.estaPausada() || partida.estaTerminada()
+                || indice < 0 || indice >= proximoCerebro.length) return;
+        if (ahora >= proximoCerebro[indice]) {
+            agregarCerebro(new Cerebro(0.2 + azar.nextDouble() * Math.max(0.1, jardin.getColumnas() - 0.4),
+                0.2 + azar.nextDouble() * Math.max(0.1, jardin.getFilas() - 0.4), ahora + 5, indice));
+            proximoCerebro[indice] = Double.POSITIVE_INFINITY;
         }
     }
     private boolean sembrar(String tipo, int f, int c) {

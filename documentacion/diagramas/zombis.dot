@@ -1,0 +1,8 @@
+digraph UML {
+ graph [rankdir=LR, bgcolor="white", pad="0.2", ranksep="0.5"];
+ node [shape=record, fontname="DejaVu Sans", fontsize=12, style=filled, fillcolor="#EDF6F1", color="#39735A"];
+ edge [arrowhead=empty, color="#60766B"];
+ Zombi [label="{{«abstract» Zombi|- salud / saludMaxima / danio / costo: int\l- modificadorVelocidad / posicionX: double\l- fila: int\l- atacando: boolean\l|+ mover(distancia)\l+ recibirDanio(cantidad)\l+ perdioBrazo(): boolean\l# setPosicionX(x)\l# setModificadorVelocidad(v)\l}}"];
+ Comun [label="{{ZombiComun|100 HP / daño 15\l}}"];Cono [label="{{ZombiCaracono|- escudoCono: int\l|+ recibirDanio(cantidad)\l+ getDanio(): int\l}}"];Garrocha [label="{{ZombiGarrocha|- saltoRealizado: boolean\l|+ realizarSalto()\l}}"];Dep [label="{{ZombiDeportista|- escudoCasco: int\l|+ recibirDanio(cantidad)\l}}"];Bailon [label="{{ZombiBailon|- bailando: boolean\l|+ iniciarBaile()\l+ terminarBaile()\l}}"];Bailarin [label="{{ZombiBailarin|Mecánica de común\lSprite propio\l}}"];Gigante [label="{{Zombistein|- zombiditoLanzado: boolean\l|+ debeLanzarZombidito(): boolean\l}}"];Hijo [label="{{Zombidito|50 HP / velocidad 1.7\lCosto 0: solo generado\l}}"];
+ Comun->Zombi;Cono->Zombi;Garrocha->Zombi;Dep->Zombi;Bailon->Zombi;Bailarin->Zombi;Gigante->Zombi;Hijo->Zombi;
+}
