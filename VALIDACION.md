@@ -18,3 +18,7 @@ La aplicación no utiliza bibliotecas Java externas, Collections dinámicas, Lom
 Las pruebas se ejecutaron en Linux con JDK 21 y pantalla virtual Xvfb. Los scripts de Windows están incluidos, pero no se probaron en una máquina Windows. Las comprobaciones cubren los casos descritos y no sustituyen la revisión académica de todos los posibles niveles.
 
 Las capturas usan cuentas/datos de demostración en un directorio temporal; esos historiales no se entregan como cuentas reales. La escena de estados visuales es una escena de prueba identificada como tal en los manuales.
+
+## Versiones Word
+
+Se generaron Manual_de_usuario.docx y Manual_tecnico.docx con el mismo contenido fuente de los PDF. Se comprobó la totalidad del texto, las 18 imágenes y 2 tablas del manual de usuario, y las 6 imágenes y 5 tablas del técnico. Los contenedores y XML se validaron y se abrió cada DOCX con LibreOffice para revisar su distribución (17 y 18 páginas respectivamente, sin páginas vacías). Se conservaron los PDF originales.

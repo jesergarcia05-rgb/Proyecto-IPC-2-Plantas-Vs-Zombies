@@ -9,6 +9,8 @@ Con Java 21 o superior, extrae la carpeta completa y abre **ejecutar.bat** en Wi
 - [Instrucciones de compilación y uso](LEEME.md)
 - [Manual de usuario PDF](documentacion/Manual_de_usuario.pdf)
 - [Manual técnico PDF con UML](documentacion/Manual_tecnico.pdf)
+- [Manual de usuario en Word editable](documentacion/Manual_de_usuario.docx)
+- [Manual técnico en Word editable](documentacion/Manual_tecnico.docx)
 - [Validación y pruebas](VALIDACION.md)
 
 El ejecutable es `dist/ZombisVsPlantas.jar`. Los datos de cada jugador se guardan en `cuentas`; conserva esa carpeta al actualizar de versión.

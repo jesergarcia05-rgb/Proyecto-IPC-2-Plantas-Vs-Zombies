@@ -16,6 +16,7 @@ Las cuentas se guardan en `cuentas`, relativa al directorio desde el que abras e
 
 - [Manual de usuario PDF](documentacion/Manual_de_usuario.pdf): instalación y capturas de cuentas, menú, configuración, combate, pausa, guardado, reanudación y estadísticas.
 - [Manual técnico PDF](documentacion/Manual_tecnico.pdf): UML, arquitectura, herencia, interfaces, algoritmos, ciclo de vida de hilos, coordenadas, IA y formatos de archivos.
+- [Manual de usuario en Word](documentacion/Manual_de_usuario.docx) y [manual técnico en Word](documentacion/Manual_tecnico.docx): mismo contenido, con texto y tablas editables y las imágenes incorporadas.
 - [Guía técnica breve](GUIA_TECNICA.md) y [validación](VALIDACION.md).
 
 Las capturas de los manuales salen de la aplicación. Los historiales utilizados en el ranking son datos de demostración aislados; la escena comparativa de zombis es una escena de prueba del renderizador.
@@ -63,3 +64,5 @@ PROBAR_INTERFAZ=1 sh probar.sh
 Se incluye `herramientas/CapturarManuales.java` para reproducir las capturas usando una carpeta de trabajo temporal. No lo ejecutes sobre tus cuentas personales: crea historiales de demostración.
 
 `herramientas/generar_manuales.py` usa Python, ReportLab y Pillow para regenerar los PDF. Los diagramas DOT se renderizan con Graphviz. Estas son herramientas de documentación, no dependencias Java del juego.
+
+Para regenerar los archivos Word: `python3 herramientas/generar_word.py`. Requiere python-docx, ReportLab y Pillow solo como herramientas de documentación; no modifica los PDF existentes ni agrega dependencias al juego.
